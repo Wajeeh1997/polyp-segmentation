@@ -1,0 +1,13 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+data
+runs
+models
+predictions
+notebooks
+tests
+docs
+*.egg-info

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Data and training artifacts stay out of git (publish best.pt as a GitHub Release asset instead)
+data/
+runs/
+models/
+predictions/
+*.pt
+*.pth
+*.zip

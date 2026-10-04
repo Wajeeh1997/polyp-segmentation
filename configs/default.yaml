@@ -1,0 +1,21 @@
+# Defaults used for the reported results. Any value can be overridden on the command line,
+# e.g.  python -m polypseg.train --override train.epochs=10 data.img_size=256
+seed: 42
+
+data:
+  img_size: 352      # images are resized to a square; inference uses the same resize
+  val_frac: 0.1
+  test_frac: 0.1
+
+model:
+  pretrained: true   # ImageNet weights for the ResNet34 encoder
+
+train:
+  epochs: 50
+  batch_size: 16
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  warmup_epochs: 2
+  bce_weight: 0.5    # loss = bce_weight * BCE + (1 - bce_weight) * soft Dice
+  num_workers: 2
+  amp: true          # mixed precision, only used on CUDA

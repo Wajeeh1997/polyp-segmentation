@@ -64,18 +64,19 @@ Right: the six lowest-Dice test images, so the weaknesses are visible too.
 git clone https://github.com/Wajeeh1997/polyp-segmentation.git
 cd polyp-segmentation
 pip install -e ".[train,api,dev]"      # install PyTorch for your platform first if needed
+```
 
-python -m polypseg.download --out-dir data                      # downloads Kvasir-SEG
-python -m polypseg.train --data-dir data --out-dir runs/unet_resnet34 \
+Download Kvasir-SEG from the [official page](https://datasets.simula.no/kvasir-seg/) (or a Kaggle
+copy) and unzip it anywhere. Then point `--data-dir` at it: the folder that contains `images/` and
+`masks/` is found automatically, even when it is nested a few levels down.
+
+```bash
+python -m polypseg.train --data-dir path/to/Kvasir-SEG --out-dir runs/unet_resnet34 \
     --config configs/default.yaml
 ```
 
-If you already have Kvasir-SEG (for example the Kaggle copy), skip the download and point
-`--data-dir` at it: the folder that contains `images/` and `masks/` is found automatically, even
-when it is nested a few levels down.
-
 Training needs a GPU to be practical. The notebook `notebooks/train_colab.ipynb` runs the same
-commands on a free Colab T4 and stores the checkpoint in Google Drive.
+commands on a free Colab T4 and stores the results in Google Drive.
 
 Outputs in `runs/unet_resnet34/`: `best.pt` (best validation Dice), `metrics.json`, `history.csv`,
 `curves.png`, `samples.png`, `failure_cases.png`, `splits.json` (exact train/val/test file lists).
@@ -90,8 +91,8 @@ python -m polypseg.predict --ckpt runs/unet_resnet34/best.pt --image path/to/ima
 
 ## Serving with Docker
 
-The checkpoint is not baked into the image. Put it in `./models/best.pt` (for example the file
-attached to this repository's GitHub Release) and mount it:
+The checkpoint is not baked into the image. Train one with `notebooks/train_colab.ipynb` (it writes
+`best.pt`), put it in `./models/best.pt`, and mount it:
 
 ```bash
 docker build -t polypseg .
@@ -110,8 +111,15 @@ curl -X POST "http://localhost:8000/predict/overlay" -F "file=@some_image.jpg" -
 curl -X POST "http://localhost:8000/predict" -F "file=@some_image.jpg" | python -m json.tool | head
 ```
 
+![API demo](docs/api_demo.png)
+
+Output of `POST /predict/overlay` on a Kvasir-SEG image, running locally on CPU. The image may come
+from the training split, so it illustrates the API rather than the held-out results above.
+
 Uploads are limited to 10 MB (`MAX_UPLOAD_MB`) and 25 megapixels; undecodable files get a `400`.
-Without Docker: `MODEL_PATH=models/best.pt uvicorn polypseg.api:app --port 8000`.
+Without Docker (Linux/macOS): `MODEL_PATH=models/best.pt uvicorn polypseg.api:app --port 8000`.
+On Windows, run `uvicorn polypseg.api:app --port 8000` from the project root with the checkpoint at
+`models\best.pt`, or set `MODEL_PATH` first.
 
 ## Method
 
